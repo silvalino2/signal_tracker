@@ -1,0 +1,2485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SIGNAL — Crypto Intelligence Platform</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Clash+Display:wght@400;500;600;700&family=Cabinet+Grotesk:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   TOKENS & RESET
+   ============================================================ */
+:root {
+  --bg:        #05070d;
+  --surface:   #090d18;
+  --surface2:  #0d1220;
+  --border:    #141b2d;
+  --border2:   #1e2840;
+
+  --green:     #0cff8a;
+  --green-dim: rgba(12,255,138,0.08);
+  --red:       #ff3d5a;
+  --red-dim:   rgba(255,61,90,0.08);
+  --amber:     #ffb800;
+  --amber-dim: rgba(255,184,0,0.08);
+  --blue:      #3d8aff;
+  --blue-dim:  rgba(61,138,255,0.08);
+
+  --text:      #dce3f5;
+  --text2:     #8896b8;
+  --text3:     #4a5a7a;
+
+  --sidebar-w: 220px;
+  --header-h:  56px;
+  --radius:    6px;
+
+  --font-display: 'Cabinet Grotesk', sans-serif;
+  --font-mono:    'DM Mono', monospace;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.5;
+  min-height: 100vh;
+  display: flex;
+  overflow-x: hidden;
+}
+
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+button { cursor: pointer; font-family: var(--font-mono); border: none; outline: none; }
+input  { font-family: var(--font-mono); outline: none; border: none; }
+a      { text-decoration: none; color: inherit; }
+
+/* ============================================================
+   AMBIENT GLOW
+   ============================================================ */
+.ambient {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(ellipse 55% 45% at 15% 10%, rgba(12,255,138,0.035) 0%, transparent 65%),
+    radial-gradient(ellipse 40% 55% at 85% 90%, rgba(61,138,255,0.03) 0%, transparent 65%),
+    radial-gradient(ellipse 30% 30% at 80% 15%, rgba(255,61,90,0.025) 0%, transparent 60%);
+}
+
+/* ============================================================
+   SIDEBAR
+   ============================================================ */
+.sidebar {
+  width: var(--sidebar-w);
+  min-height: 100vh;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  left: 0; top: 0; bottom: 0;
+  z-index: 100;
+  transition: transform 0.3s ease;
+}
+
+.sidebar-logo {
+  padding: 20px 20px 18px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logo-icon {
+  width: 32px; height: 32px;
+  background: var(--green);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.logo-icon svg { width: 16px; height: 16px; }
+
+.logo-text {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 17px;
+  letter-spacing: 0.05em;
+  color: var(--text);
+}
+
+.logo-text span { color: var(--green); }
+
+.sidebar-section {
+  padding: 18px 12px 6px;
+}
+
+.sidebar-label {
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  color: var(--text3);
+  text-transform: uppercase;
+  padding: 0 8px;
+  margin-bottom: 6px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 10px;
+  border-radius: var(--radius);
+  color: var(--text2);
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.15s;
+  margin-bottom: 2px;
+  position: relative;
+  letter-spacing: 0.02em;
+}
+
+.nav-item:hover { background: var(--border); color: var(--text); }
+
+.nav-item.active {
+  background: var(--green-dim);
+  color: var(--green);
+  border: 1px solid rgba(12,255,138,0.15);
+}
+
+.nav-item.active .nav-icon { color: var(--green); }
+
+.nav-icon {
+  width: 16px; height: 16px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nav-badge {
+  margin-left: auto;
+  font-size: 9px;
+  background: var(--green);
+  color: var(--bg);
+  padding: 1px 6px;
+  border-radius: 20px;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+.sidebar-footer {
+  margin-top: auto;
+  padding: 16px 12px;
+  border-top: 1px solid var(--border);
+}
+
+.market-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 10px;
+  border-radius: var(--radius);
+  background: var(--surface2);
+  border: 1px solid var(--border);
+}
+
+.status-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--green);
+  flex-shrink: 0;
+  animation: blink 2s infinite;
+}
+
+@keyframes blink {
+  0%,100% { opacity: 1; }
+  50%      { opacity: 0.3; }
+}
+
+.status-text { font-size: 11px; color: var(--text2); }
+.status-text strong { color: var(--green); font-size: 10px; letter-spacing: 0.05em; }
+
+/* ============================================================
+   MAIN LAYOUT
+   ============================================================ */
+.main {
+  margin-left: var(--sidebar-w);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  position: relative;
+  z-index: 1;
+}
+
+.topbar {
+  height: var(--header-h);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+  gap: 16px;
+  background: rgba(9,13,24,0.8);
+  backdrop-filter: blur(12px);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+.topbar-title {
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.topbar-sub {
+  font-size: 11px;
+  color: var(--text3);
+  margin-left: 4px;
+}
+
+.topbar-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.search-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-icon {
+  position: absolute;
+  left: 10px;
+  color: var(--text3);
+  width: 13px; height: 13px;
+  pointer-events: none;
+}
+
+.search-input {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-size: 12px;
+  padding: 7px 12px 7px 30px;
+  border-radius: var(--radius);
+  width: 200px;
+  transition: border-color 0.2s, width 0.2s;
+}
+
+.search-input::placeholder { color: var(--text3); }
+.search-input:focus { border-color: var(--green); width: 240px; }
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: var(--radius);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  transition: all 0.15s;
+}
+
+.btn-primary {
+  background: var(--green);
+  color: var(--bg);
+  font-weight: 700;
+}
+
+.btn-primary:hover { background: #0adc7a; }
+.btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.btn-ghost {
+  background: transparent;
+  color: var(--text2);
+  border: 1px solid var(--border2);
+}
+
+.btn-ghost:hover { background: var(--border); color: var(--text); }
+
+/* ============================================================
+   PAGE CONTENT
+   ============================================================ */
+.page { display: none; padding: 24px; flex-direction: column; gap: 20px; }
+.page.active { display: flex; }
+
+/* ============================================================
+   METRIC CARDS
+   ============================================================ */
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+.metric-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 18px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+
+.metric-card:hover { border-color: var(--border2); }
+
+.metric-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: var(--accent-line, var(--green));
+  opacity: 0.6;
+}
+
+.metric-card.red-line  { --accent-line: var(--red); }
+.metric-card.amber-line { --accent-line: var(--amber); }
+.metric-card.blue-line  { --accent-line: var(--blue); }.metric-label {
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  color: var(--text3);
+  text-transform: uppercase;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.metric-value {
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: 800;
+  line-height: 1;
+  margin-bottom: 6px;
+}
+
+.metric-value.green  { color: var(--green); }
+.metric-value.red    { color: var(--red); }
+.metric-value.amber  { color: var(--amber); }
+.metric-value.blue   { color: var(--blue); }
+.metric-value.white  { color: var(--text); }
+
+.metric-sub {
+  font-size: 10px;
+  color: var(--text3);
+}
+
+.metric-icon {
+  position: absolute;
+  top: 14px; right: 14px;
+  width: 30px; height: 30px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  opacity: 0.5;
+}
+
+/* ============================================================
+   TABLE
+   ============================================================ */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.card-header {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.card-title {
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.card-sub {
+  font-size: 11px;
+  color: var(--text3);
+  margin-left: 2px;
+}
+
+.card-actions { margin-left: auto; display: flex; gap: 8px; align-items: center; }
+
+.filter-pills {
+  display: flex;
+  gap: 4px;
+}
+
+.pill {
+  padding: 5px 11px;
+  border-radius: 20px;
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  border: 1px solid var(--border2);
+  background: transparent;
+  color: var(--text3);
+  transition: all 0.15s;
+  text-transform: uppercase;
+}
+
+.pill:hover { color: var(--text2); border-color: var(--text3); }
+.pill.active {
+  background: var(--green-dim);
+  color: var(--green);
+  border-color: rgba(12,255,138,0.3);
+}
+
+.pill.red-pill.active {
+  background: var(--red-dim);
+  color: var(--red);
+  border-color: rgba(255,61,90,0.3);
+}
+
+/* Table */
+.tbl-wrap { overflow-x: auto; }
+
+.tbl {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.tbl thead th {
+  padding: 10px 16px;
+  text-align: left;
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  color: var(--text3);
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+  font-weight: 400;
+}
+
+.tbl thead th.r { text-align: right; }
+
+.tbl tbody tr {
+  border-bottom: 1px solid var(--border);
+  transition: background 0.12s;
+  cursor: pointer;
+}
+
+.tbl tbody tr:last-child { border-bottom: none; }
+.tbl tbody tr:hover { background: rgba(255,255,255,0.018); }
+
+.tbl tbody td {
+  padding: 11px 16px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.tbl tbody td.r { text-align: right; }
+
+.coin-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.coin-icon {
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text2);
+  flex-shrink: 0;
+  font-family: var(--font-display);
+  overflow: hidden;
+}
+
+.coin-icon img { width: 100%; height: 100%; border-radius: 50%; }
+
+.coin-sym {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--text);
+  letter-spacing: 0.03em;
+}
+
+.coin-name {
+  font-size: 10px;
+  color: var(--text3);
+  margin-top: 1px;
+}
+
+.price-cell {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.chg-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  font-family: var(--font-display);
+}
+
+.chg-pill.pos { background: var(--green-dim); color: var(--green); }
+.chg-pill.neg { background: var(--red-dim);   color: var(--red);   }
+
+.signal-tag {
+  display: inline-block;
+  padding: 3px 9px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.sig-sb  { background: rgba(12,255,138,0.15);  color: var(--green); border: 1px solid rgba(12,255,138,0.3);  }
+.sig-b   { background: rgba(12,255,138,0.07);  color: #09cc6e;      border: 1px solid rgba(12,255,138,0.15); }
+.sig-n   { background: rgba(255,184,0,0.07);   color: var(--amber); border: 1px solid rgba(255,184,0,0.2);   }
+.sig-s   { background: rgba(255,61,90,0.07);   color: #cc2e45;      border: 1px solid rgba(255,61,90,0.15);  }
+.sig-ss  { background: rgba(255,61,90,0.15);   color: var(--red);   border: 1px solid rgba(255,61,90,0.3);   }
+
+.vol-bar-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.vol-bar {
+  height: 3px;
+  background: var(--border2);
+  border-radius: 2px;
+  flex: 1;
+  min-width: 50px;
+  overflow: hidden;
+}
+
+.vol-fill {
+  height: 100%;
+  background: var(--blue);
+  border-radius: 2px;
+  transition: width 0.5s ease;
+}
+
+/* Sparkline */
+.spark { width: 70px; height: 28px; }
+
+/* ============================================================
+   RANK NUMBER
+   ============================================================ */
+.rank-num {
+  font-size: 11px;
+  color: var(--text3);
+  font-weight: 400;
+  width: 24px;
+  text-align: right;
+}
+
+/* ============================================================
+   WATCHLIST PAGE
+   ============================================================ */
+.watchlist-empty {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text3);
+  font-size: 12px;
+  line-height: 2;
+}
+
+.watchlist-empty .icon { font-size: 32px; margin-bottom: 12px; }
+
+.watch-btn {
+  background: transparent;
+  border: 1px solid var(--border2);
+  color: var(--text3);
+  font-size: 11px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: all 0.15s;
+  font-family: var(--font-mono);
+}
+
+.watch-btn:hover, .watch-btn.watching {
+  border-color: var(--amber);
+  color: var(--amber);
+  background: var(--amber-dim);
+}
+
+/* ============================================================
+   SIGNALS PAGE
+   ============================================================ */
+.signals-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.signal-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  transition: border-color 0.2s, transform 0.15s;
+  cursor: pointer;
+}
+
+.signal-card:hover {
+  border-color: var(--border2);
+  transform: translateY(-1px);
+}
+
+.signal-card.buy-card  { border-top: 2px solid var(--green); }
+.signal-card.sell-card { border-top: 2px solid var(--red); }
+.signal-card.neut-card { border-top: 2px solid var(--amber); }
+
+.sc-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.sc-coin { display: flex; align-items: center; gap: 10px; }
+
+.sc-sym {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 16px;
+}
+
+.sc-name { font-size: 10px; color: var(--text3); margin-top: 1px; }
+
+.sc-price {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 15px;
+  text-align: right;
+}
+
+.sc-chg {
+  font-size: 11px;
+  text-align: right;
+  margin-top: 2px;
+  font-weight: 700;
+}
+
+.sc-metrics {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
+.sc-metric-label { font-size: 9px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 3px; }
+.sc-metric-value { font-size: 12px; color: var(--text); font-weight: 500; }
+
+/* ============================================================
+   LOADER & ERROR
+   ============================================================ */
+.loader-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  gap: 14px;
+}
+
+.loader-track {
+  width: 160px; height: 2px;
+  background: var(--border);
+  border-radius: 1px;
+  overflow: hidden;
+}
+
+.loader-fill {
+  height: 100%;
+  background: var(--green);
+  border-radius: 1px;
+  animation: slide 1.4s infinite ease-in-out;
+}
+
+@keyframes slide {
+  0%   { transform: translateX(-100%) scaleX(0.4); }
+  50%  { transform: translateX(60%)   scaleX(1); }
+  100% { transform: translateX(280%)  scaleX(0.4); }
+}
+
+.loader-text {
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  color: var(--text3);
+  text-transform: uppercase;
+}
+
+.error-wrap {
+  padding: 40px 20px;
+  text-align: center;
+  color: var(--red);
+  font-size: 12px;
+  line-height: 1.8;
+}
+
+/* ============================================================
+   PAGINATION
+   ============================================================ */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 18px;
+  border-top: 1px solid var(--border);
+  font-size: 11px;
+  color: var(--text3);
+}
+
+.page-btns { display: flex; gap: 4px; }
+
+.page-btn {
+  padding: 5px 10px;
+  border-radius: 4px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--text2);
+  font-size: 11px;
+  transition: all 0.12s;
+}
+
+.page-btn:hover { border-color: var(--green); color: var(--green); }
+.page-btn.active { background: var(--green-dim); color: var(--green); border-color: rgba(12,255,138,0.3); }
+.page-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+/* ============================================================
+   MODAL
+   ============================================================ */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(5,7,13,0.85);
+  backdrop-filter: blur(4px);
+  z-index: 200;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.modal-overlay.open { display: flex; }
+
+.modal {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 10px;
+  width: 100%;
+  max-width: 520px;
+  max-height: 85vh;
+  overflow-y: auto;
+  animation: modalIn 0.2s ease;
+}
+
+@keyframes modalIn {
+  from { opacity: 0; transform: scale(0.96) translateY(10px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.modal-header {
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.modal-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.modal-close {
+  background: transparent;
+  color: var(--text3);
+  font-size: 20px;
+  line-height: 1;
+  padding: 0 4px;
+  transition: color 0.15s;
+}
+
+.modal-close:hover { color: var(--text); }
+
+.modal-body { padding: 20px; }
+
+.modal-price-row {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.modal-price {
+  font-family: var(--font-display);
+  font-size: 30px;
+  font-weight: 800;
+}
+
+.modal-chg {
+  font-size: 16px;
+  font-weight: 700;
+  font-family: var(--font-display);
+}
+
+.modal-stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.modal-stat {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+}
+
+.modal-stat-label { font-size: 9px; color: var(--text3); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 5px; }
+.modal-stat-value { font-size: 14px; font-weight: 600; font-family: var(--font-display); }
+
+.signal-analysis {
+  background: var(--surface2);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  padding: 14px;
+}
+
+.sa-title { font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text3); margin-bottom: 12px; }
+
+.sa-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  font-size: 12px;
+}
+
+.sa-label { color: var(--text2); }
+
+.sa-bar-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  margin: 0 12px;
+}
+
+.sa-bar {
+  flex: 1;
+  height: 4px;
+  background: var(--border2);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.sa-fill { height: 100%; border-radius: 2px; transition: width 0.5s ease; }
+.sa-val { font-size: 11px; color: var(--text2); width: 30px; text-align: right; }
+
+.modal-footer {
+  padding: 14px 20px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+/* ============================================================
+   TOAST
+   ============================================================ */
+.toast-wrap {
+  position: fixed;
+  bottom: 24px; right: 24px;
+  z-index: 300;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.toast {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius);
+  padding: 10px 16px;
+  font-size: 12px;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+  animation: toastIn 0.25s ease, toastOut 0.3s ease 2.7s forwards;
+  pointer-events: all;
+  min-width: 220px;
+}
+
+.toast.green-toast { border-left: 3px solid var(--green); }
+.toast.red-toast   { border-left: 3px solid var(--red); }
+.toast.amber-toast { border-left: 3px solid var(--amber); }
+
+@keyframes toastIn  { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes toastOut { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(10px); } }
+
+/* ============================================================
+   MOBILE
+   ============================================================ */
+.mobile-header {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 50px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  z-index: 200;
+  align-items: center;
+  padding: 0 16px;
+  gap: 12px;
+}
+
+.hamburger {
+  background: transparent;
+  color: var(--text2);
+  font-size: 20px;
+  padding: 4px;
+}
+
+.mobile-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: 99;
+}
+
+@media (max-width: 768px) {
+  .sidebar { transform: translateX(-100%); }
+  .sidebar.open { transform: translateX(0); }
+  .mobile-header { display: flex; }
+  .mobile-overlay.open { display: block; }
+  .main { margin-left: 0; padding-top: 50px; }
+  .metrics-grid { grid-template-columns: repeat(2, 1fr); }
+  .signals-grid { grid-template-columns: 1fr; }
+  .tbl thead th:nth-child(n+5) { display: none; }
+  .tbl tbody td:nth-child(n+5) { display: none; }
+  .topbar { padding: 0 16px; }
+  .page { padding: 16px; }
+  .search-input { width: 140px; }
+  .search-input:focus { width: 160px; }
+}
+
+/* ============================================================
+   ANIMATIONS
+   ============================================================ */
+.fade-in {
+  animation: fadeInUp 0.35s ease forwards;
+  opacity: 0;
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.stagger-1 { animation-delay: 0.05s; }
+.stagger-2 { animation-delay: 0.10s; }
+.stagger-3 { animation-delay: 0.15s; }
+.stagger-4 { animation-delay: 0.20s; }
+
+</style>
+</head>
+<body>
+
+<div class="ambient"></div>
+
+<!-- ============================================================
+     MOBILE HEADER
+     ============================================================ -->
+<div class="mobile-header">
+  <button class="hamburger" onclick="toggleSidebar()">☰</button>
+  <div style="font-family:var(--font-display);font-weight:800;font-size:16px;color:var(--green)">SIGNAL<span style="color:var(--text)">.</span></div>
+</div>
+<div class="mobile-overlay" id="mobileOverlay" onclick="toggleSidebar()"></div>
+
+<!-- ============================================================
+     SIDEBAR
+     ============================================================ -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-icon">
+      <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M2 10L6 6L9 9L14 4" stroke="#05070d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="14" cy="4" r="1.5" fill="#05070d"/>
+      </svg>
+    </div>
+    <div class="logo-text">SIGNAL<span>.</span></div>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-label">Explore</div>
+    <div class="nav-item active" onclick="navigate('markets', this)">
+      <span class="nav-icon">⬡</span> Markets
+      <span class="nav-badge" id="navBuyBadge">—</span>
+    </div>
+    <div class="nav-item" onclick="navigate('signals', this)">
+      <span class="nav-icon">◈</span> Signals
+    </div>
+    <div class="nav-item" onclick="navigate('watchlist', this)">
+      <span class="nav-icon">◉</span> Watchlist
+      <span class="nav-badge" id="watchBadge" style="background:var(--amber);display:none">0</span>
+    </div>
+    <div class="nav-item" onclick="navigate('history', this)">
+      <span class="nav-icon">◷</span> History
+    </div>
+    <div class="nav-item" onclick="navigate('movers', this)">
+      <span class="nav-icon" style="color:var(--amber)">⚡</span> 24h Movers
+      <span class="nav-badge" id="moversBadge" style="background:var(--amber);display:none">0</span>
+    </div>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-label">Filters</div>
+    <div class="nav-item" onclick="quickFilter('gainers', this)" id="qf-gainers">
+      <span class="nav-icon" style="color:var(--green)">▲</span> Top Gainers
+    </div>
+    <div class="nav-item" onclick="quickFilter('losers', this)" id="qf-losers">
+      <span class="nav-icon" style="color:var(--red)">▼</span> Top Losers
+    </div>
+    <div class="nav-item" onclick="quickFilter('volume', this)" id="qf-volume">
+      <span class="nav-icon" style="color:var(--blue)">◈</span> High Volume
+    </div>
+    <div class="nav-item" onclick="quickFilter('all', this)" id="qf-all">
+      <span class="nav-icon">⊞</span> All Tokens
+    </div>
+  </div>
+
+  <div class="sidebar-footer">
+    <div class="market-status">
+      <div class="status-dot"></div>
+      <div class="status-text"><strong>LIVE</strong><br>CoinGecko API</div>
+    </div>
+  </div>
+</aside>
+
+<!-- ============================================================
+     MAIN
+     ============================================================ -->
+<main class="main">
+  <div class="topbar">
+    <div>
+      <span class="topbar-title" id="topbarTitle">Markets</span>
+      <span class="topbar-sub" id="topbarSub">Live overview</span>
+    </div>
+    <div class="topbar-right">
+      <div class="search-wrap">
+        <svg class="search-icon" viewBox="0 0 14 14" fill="none">
+          <circle cx="5.5" cy="5.5" r="4" stroke="currentColor" stroke-width="1.5"/>
+          <path d="M9 9L12.5 12.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <input class="search-input" id="searchInput" type="text" placeholder="Search token..." oninput="handleSearch()">
+      </div>
+      <button class="btn btn-primary" id="refreshBtn" onclick="fetchData()">
+        <span id="refreshIcon">↻</span> Refresh
+      </button>
+    </div>
+  </div>
+
+  <!-- MARKETS PAGE -->
+  <div class="page active" id="page-markets">
+    <div class="metrics-grid">
+      <div class="metric-card fade-in stagger-1">
+        <div class="metric-label">📊 Tokens Tracked</div>
+        <div class="metric-value white" id="mTotal">—</div>
+        <div class="metric-sub">Top 40 by market cap</div>
+        <div class="metric-icon">⬡</div>
+      </div>
+      <div class="metric-card fade-in stagger-2">
+        <div class="metric-label">📈 Avg 24h Change</div>
+        <div class="metric-value" id="mAvg">—</div>
+        <div class="metric-sub" id="mAvgSub">—</div>
+        <div class="metric-icon">◈</div>
+      </div>
+      <div class="metric-card fade-in stagger-3">
+        <div class="metric-label">🟢 Buy Signals</div>
+        <div class="metric-value green" id="mBuy">—</div>
+        <div class="metric-sub">Strong Buy + Buy</div>
+        <div class="metric-icon">▲</div>
+      </div>
+      <div class="metric-card red-line fade-in stagger-4">
+        <div class="metric-label">🔴 Sell Signals</div>
+        <div class="metric-value red" id="mSell">—</div>
+        <div class="metric-sub">Strong Sell + Sell</div>
+        <div class="metric-icon">▼</div>
+      </div>
+    </div>
+
+    <div class="card fade-in">
+      <div class="card-header">
+        <div>
+          <div class="card-title">Token Rankings</div>
+          <div class="card-sub" id="tableSubtitle">Loading...</div>
+        </div>
+        <div class="card-actions">
+          <div class="filter-pills">
+            <button class="pill active" onclick="setTableFilter('all',   this)">All</button>
+            <button class="pill"        onclick="setTableFilter('buy',   this)">Buys</button>
+            <button class="pill red-pill" onclick="setTableFilter('sell', this)">Sells</button>
+          </div>
+        </div>
+      </div>
+      <div class="tbl-wrap">
+        <table class="tbl" id="mainTable">
+          <thead>
+            <tr>
+              <th style="width:36px">#</th>
+              <th>Token</th>
+              <th class="r">Price</th>
+              <th class="r">24h %</th>
+              <th class="r">Volume 24h</th>
+              <th class="r">Mkt Cap</th>
+              <th class="r">Signal</th>
+              <th class="r">Target / Stop</th>
+              <th class="r">Watch</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody">
+            <tr><td colspan="9"><div class="loader-wrap"><div class="loader-text">Fetching market data</div><div class="loader-track"><div class="loader-fill"></div></div></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="pagination" id="pagination" style="display:none">
+        <span id="pageInfo" style="color:var(--text3);font-size:11px"></span>
+        <div class="page-btns" id="pageBtns"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SIGNALS PAGE -->
+  <div class="page" id="page-signals">
+    <div class="card" style="padding:0">
+      <div class="card-header">
+        <div>
+          <div class="card-title">Active Signals</div>
+          <div class="card-sub">Momentum-based algorithmic scoring</div>
+        </div>
+        <div class="card-actions">
+          <div class="filter-pills">
+            <button class="pill active" onclick="setSignalFilter('all', this)">All</button>
+            <button class="pill" onclick="setSignalFilter('buy', this)">Buy Only</button>
+            <button class="pill red-pill" onclick="setSignalFilter('sell', this)">Sell Only</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="signals-grid" id="signalsGrid">
+      <div style="grid-column:1/-1"><div class="loader-wrap"><div class="loader-text">Loading signals</div><div class="loader-track"><div class="loader-fill"></div></div></div></div>
+    </div>
+  </div>
+
+  <!-- WATCHLIST PAGE -->
+  <div class="page" id="page-watchlist">
+    <div class="card fade-in">
+      <div class="card-header">
+        <div>
+          <div class="card-title">Your Watchlist</div>
+          <div class="card-sub">Click ☆ on any token to watch it</div>
+        </div>
+      </div>
+      <div class="tbl-wrap">
+        <table class="tbl" id="watchTable">
+          <thead>
+            <tr>
+              <th style="width:36px">#</th>
+              <th>Token</th>
+              <th class="r">Price</th>
+              <th class="r">24h %</th>
+              <th class="r">Volume 24h</th>
+              <th class="r">Signal</th>
+              <th class="r">Remove</th>
+            </tr>
+          </thead>
+          <tbody id="watchBody">
+            <tr><td colspan="7"><div class="watchlist-empty"><div class="icon">◎</div>No tokens in watchlist.<br>Head to Markets and click ☆ to track a token.</div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- HISTORY PAGE -->
+  <div class="page" id="page-history">
+    <div class="metrics-grid" style="grid-template-columns:repeat(4,1fr)">
+      <div class="metric-card fade-in stagger-1">
+        <div class="metric-label">📋 Signals Logged</div>
+        <div class="metric-value white" id="hTotal">—</div>
+        <div class="metric-sub">Yesterday's calls</div>
+      </div>
+      <div class="metric-card fade-in stagger-2">
+        <div class="metric-label">✅ Hits</div>
+        <div class="metric-value green" id="hHits">—</div>
+        <div class="metric-sub">Target reached</div>
+      </div>
+      <div class="metric-card red-line fade-in stagger-3">
+        <div class="metric-label">❌ Stopped Out</div>
+        <div class="metric-value red" id="hMiss">—</div>
+        <div class="metric-sub">Stop loss hit</div>
+      </div>
+      <div class="metric-card amber-line fade-in stagger-4">
+        <div class="metric-label">⏳ Pending</div>
+        <div class="metric-value amber" id="hPending">—</div>
+        <div class="metric-sub">Still open</div>
+      </div>
+    </div>
+
+    <div class="card fade-in">
+      <div class="card-header">
+        <div>
+          <div class="card-title">Yesterday's Signals</div>
+          <div class="card-sub" id="historyDate">—</div>
+        </div>
+        <div class="card-actions">
+          <div class="filter-pills">
+            <button class="pill active" onclick="setHistoryFilter('all', this)">All</button>
+            <button class="pill"        onclick="setHistoryFilter('buy', this)">Buys</button>
+            <button class="pill red-pill" onclick="setHistoryFilter('sell', this)">Sells</button>
+            <button class="pill"        onclick="setHistoryFilter('hit', this)">Hits ✓</button>
+          </div>
+        </div>
+      </div>
+      <div class="tbl-wrap">
+        <table class="tbl">
+          <thead>
+            <tr>
+              <th>Token</th>
+              <th class="r">Signal</th>
+              <th class="r">Entry Price</th>
+              <th class="r">Target</th>
+              <th class="r">Stop Loss</th>
+              <th class="r">Current Price</th>
+              <th class="r">P&amp;L %</th>
+              <th class="r">Outcome</th>
+            </tr>
+          </thead>
+          <tbody id="historyBody">
+            <tr><td colspan="8"><div class="loader-wrap"><div class="loader-text">Loading history</div><div class="loader-track"><div class="loader-fill"></div></div></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div style="padding:12px 0;font-size:10px;color:var(--text3);line-height:1.8;border-top:1px solid var(--border);margin-top:4px">
+      ⚠ History is simulated from live data using yesterday's open price approximated from the 24h change. Outcome is determined by whether current price reached the target or stop loss. Not financial advice.
+    </div>
+  </div>
+
+  <!-- MOVERS PAGE -->
+  <div class="page" id="page-movers">
+
+    <!-- Summary bar -->
+    <div class="metrics-grid" style="grid-template-columns:repeat(4,1fr)">
+      <div class="metric-card fade-in stagger-1">
+        <div class="metric-label">⚡ High Probability Movers</div>
+        <div class="metric-value amber" id="mvTotal">—</div>
+        <div class="metric-sub">Next 24h candidates</div>
+      </div>
+      <div class="metric-card fade-in stagger-2">
+        <div class="metric-label">🚀 Pump Candidates</div>
+        <div class="metric-value green" id="mvPump">—</div>
+        <div class="metric-sub">Volume + momentum up</div>
+      </div>
+      <div class="metric-card red-line fade-in stagger-3">
+        <div class="metric-label">💥 Dump Candidates</div>
+        <div class="metric-value red" id="mvDump">—</div>
+        <div class="metric-sub">Overextended + fading</div>
+      </div>
+      <div class="metric-card blue-line fade-in stagger-4">
+        <div class="metric-label">📊 Avg Mover Score</div>
+        <div class="metric-value blue" id="mvAvgScore">—</div>
+        <div class="metric-sub">Out of 100</div>
+      </div>
+    </div>
+
+    <!-- Explanation -->
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px 16px;font-size:11px;color:var(--text3);line-height:1.8" class="fade-in">
+      <span style="color:var(--amber);font-weight:700">⚡ How Mover Score works:</span>
+      Score 0–100 per token. Built from 4 factors:
+      <span style="color:var(--text2)">Volume Spike</span> (volume vs 7-day avg sparkline baseline) ·
+      <span style="color:var(--text2)">Momentum</span> (24h % change magnitude) ·
+      <span style="color:var(--text2)">Price Compression</span> (tight 24h range = coiling for breakout) ·
+      <span style="color:var(--text2)">Distance from ATH</span> (room to run on pumps).
+      Score ≥ 60 = high probability mover. Direction = pump or dump based on momentum bias.
+    </div>
+
+    <!-- Pump candidates -->
+    <div class="card fade-in">
+      <div class="card-header">
+        <div>
+          <div class="card-title" style="color:var(--green)">🚀 Pump Candidates</div>
+          <div class="card-sub">Coiling for upside breakout in next 24h</div>
+        </div>
+        <div class="card-actions">
+          <div class="filter-pills" id="moverPumpFilter">
+            <button class="pill active" onclick="setMoverSort('score', this, 'pump')">By Score</button>
+            <button class="pill" onclick="setMoverSort('change', this, 'pump')">By Change</button>
+            <button class="pill" onclick="setMoverSort('volume', this, 'pump')">By Volume</button>
+          </div>
+        </div>
+      </div>
+      <div class="tbl-wrap">
+        <table class="tbl">
+          <thead>
+            <tr>
+              <th>Token</th>
+              <th class="r">Price</th>
+              <th class="r">24h %</th>
+              <th class="r">Mover Score</th>
+              <th class="r">Vol Spike</th>
+              <th class="r">Target</th>
+              <th class="r">Stop Loss</th>
+              <th class="r">R:R</th>
+            </tr>
+          </thead>
+          <tbody id="pumpBody">
+            <tr><td colspan="8"><div class="loader-wrap"><div class="loader-text">Analyzing movers</div><div class="loader-track"><div class="loader-fill"></div></div></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Dump candidates -->
+    <div class="card fade-in">
+      <div class="card-header">
+        <div>
+          <div class="card-title" style="color:var(--red)">💥 Dump Candidates</div>
+          <div class="card-sub">Overextended or fading — likely to drop in next 24h</div>
+        </div>
+        <div class="card-actions">
+          <div class="filter-pills" id="moverDumpFilter">
+            <button class="pill active" onclick="setMoverSort('score', this, 'dump')">By Score</button>
+            <button class="pill" onclick="setMoverSort('change', this, 'dump')">By Change</button>
+            <button class="pill" onclick="setMoverSort('volume', this, 'dump')">By Volume</button>
+          </div>
+        </div>
+      </div>
+      <div class="tbl-wrap">
+        <table class="tbl">
+          <thead>
+            <tr>
+              <th>Token</th>
+              <th class="r">Price</th>
+              <th class="r">24h %</th>
+              <th class="r">Mover Score</th>
+              <th class="r">Vol Spike</th>
+              <th class="r">Target</th>
+              <th class="r">Stop Loss</th>
+              <th class="r">R:R</th>
+            </tr>
+          </thead>
+          <tbody id="dumpBody">
+            <tr><td colspan="8"><div class="loader-wrap"><div class="loader-text">Analyzing movers</div><div class="loader-track"><div class="loader-fill"></div></div></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div style="padding:10px 0;font-size:10px;color:var(--text3);border-top:1px solid var(--border);line-height:1.8">
+      ⚠ Mover scores are algorithmic estimates based on momentum, volume, and price structure. Meme coins are highly volatile. This is not financial advice. Always use stop losses.
+    </div>
+  </div>
+
+</main>
+
+<!-- ============================================================
+     DETAIL MODAL
+     ============================================================ -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal" id="modalBox">
+    <div class="modal-header">
+      <div class="modal-title" id="modalTitle">—</div>
+      <button class="modal-close" onclick="closeModalDirect()">✕</button>
+    </div>
+    <div class="modal-body" id="modalBody">—</div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModalDirect()">Close</button>
+      <button class="btn btn-primary" id="modalWatchBtn" onclick="toggleWatchFromModal()">☆ Watch</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast container -->
+<div class="toast-wrap" id="toastWrap"></div>
+
+<script>
+/* ============================================================
+   STATE
+   ============================================================ */
+let allTokens   = [];
+let watchlist   = new Set(JSON.parse(localStorage.getItem('signal_watch') || '[]'));
+let tableFilter = 'all';
+let sigFilter   = 'all';
+let currentPage = 1;
+let perPage     = 15;
+let searchQuery = '';
+let modalToken  = null;
+let activePage  = 'markets';
+
+/* ============================================================
+   COIN LIST — Bybit-listed & high-probability memecoins
+   Confirmed on Bybit: DOGE, SHIB, PEPE, FLOKI, BONK, WIF,
+   BOME, POPCAT, MEW, BRETT, TURBO, NEIRO, PENGU, TRUMP,
+   BABYDOGE, DOGS, MOG, SPX, FARTCOIN
+   High-probability / recently listed: PONKE, SLERF, MYRO,
+   COQ, WEN, SILLY, PNUT, MOODENG
+   ============================================================ */
+const COINS = [
+  // Tier 1 — confirmed, high liquidity
+  'dogecoin',              // DOGE
+  'shiba-inu',             // SHIB
+  'pepe',                  // PEPE
+  'floki',                 // FLOKI
+  'bonk',                  // BONK
+  'dogwifcoin',            // WIF
+  'book-of-meme',          // BOME
+  'popcat',                // POPCAT
+  'cat-in-a-dogs-world',   // MEW
+  'brett-base',            // BRETT (Base)
+  'turbo',                 // TURBO
+  'neiro-on-eth',          // NEIRO
+  'pudgy-penguins',        // PENGU
+  'official-trump',        // TRUMP
+  'mog-coin',              // MOG
+  'spx6900',               // SPX6900
+  'fartcoin',              // FARTCOIN
+  'dogs-2',                // DOGS (Telegram)
+  'peanut-the-squirrel',   // PNUT
+  'moo-deng',              // MOODENG
+
+  // Tier 2 — listed or high volume on Bybit
+  'babydoge-coin',         // BABYDOGE
+  'ponke',                 // PONKE
+  'slerf',                 // SLERF
+  'myro',                  // MYRO
+  'coq-inu',               // COQ
+  'wen-4',                 // WEN
+  'silly-dragon',          // SILLY
+  'act-i-the-ai-prophecy', // ACT
+  'chillguy',              // CHILLGUY
+  'giga',                  // GIGA
+];
+
+/* ============================================================
+   SIGNAL ENGINE
+   ============================================================ */
+function computeSignal(change, volume, mcap) {
+  let score = 0;
+  if      (change > 15) score += 4;
+  else if (change > 8)  score += 3;
+  else if (change > 4)  score += 2;
+  else if (change > 1)  score += 1;
+  else if (change < -15) score -= 4;
+  else if (change < -8)  score -= 3;
+  else if (change < -4)  score -= 2;
+  else if (change < -1)  score -= 1;
+
+  const vr = volume / (mcap || 1);
+  if      (vr > 0.2)  score += 3;
+  else if (vr > 0.1)  score += 2;
+  else if (vr > 0.05) score += 1;
+  else if (vr < 0.01) score -= 1;
+
+  if      (score >= 5)  return { label: 'Strong Buy',  cls: 'sig-sb',  type: 'buy',  score };
+  else if (score >= 2)  return { label: 'Buy',         cls: 'sig-b',   type: 'buy',  score };
+  else if (score <= -5) return { label: 'Strong Sell', cls: 'sig-ss',  type: 'sell', score };
+  else if (score <= -2) return { label: 'Sell',        cls: 'sig-s',   type: 'sell', score };
+  else                  return { label: 'Neutral',     cls: 'sig-n',   type: 'neut', score };
+}
+
+/* ============================================================
+   PRICE TARGET ENGINE
+   ============================================================ */
+function computeTarget(t) {
+  const { price, change, high24, low24, ath, signal } = t;
+  if (!price || signal.type === 'neut') return null;
+
+  const range24 = high24 - low24 || price * 0.05;
+  const isBuy   = signal.type === 'buy';
+
+  // Base move: strong signals project further
+  const strength = Math.abs(signal.score);
+  let multiplier;
+  if      (strength >= 6) multiplier = isBuy ? 0.18 : 0.18;
+  else if (strength >= 4) multiplier = isBuy ? 0.12 : 0.12;
+  else                    multiplier = isBuy ? 0.07 : 0.07;
+
+  // Resistance/support: use 24h range as reference structure
+  let target;
+  if (isBuy) {
+    // Target = price + (range * multiplier * score weight)
+    target = price + (range24 * multiplier * strength);
+    // Cap at ATH if meaningful
+    if (ath && target > ath * 1.05) target = ath * 1.05;
+  } else {
+    target = price - (range24 * multiplier * strength);
+    if (target < 0) target = price * 0.5;
+  }
+
+  // Derive stop loss: tighter than target, opposite side of 24h range
+  const stopDist = range24 * 0.4;
+  const stop = isBuy ? price - stopDist : price + stopDist;
+
+  // Risk/reward
+  const reward = Math.abs(target - price);
+  const risk   = Math.abs(stop   - price);
+  const rr     = risk > 0 ? (reward / risk).toFixed(1) : '—';
+
+  return { target, stop, rr, isBuy };
+}
+
+/* ============================================================
+   FORMAT HELPERS
+   ============================================================ */
+function fmtPrice(p) {
+  if (!p && p !== 0) return '—';
+  if (p >= 10000)  return '$' + p.toLocaleString('en', {maximumFractionDigits: 0});
+  if (p >= 1000)   return '$' + p.toLocaleString('en', {maximumFractionDigits: 1});
+  if (p >= 1)      return '$' + p.toFixed(3);
+  if (p >= 0.001)  return '$' + p.toFixed(5);
+  return '$' + p.toExponential(2);
+}
+
+function fmtLarge(n) {
+  if (!n) return '—';
+  if (n >= 1e12) return '$' + (n/1e12).toFixed(2) + 'T';
+  if (n >= 1e9)  return '$' + (n/1e9).toFixed(2)  + 'B';
+  if (n >= 1e6)  return '$' + (n/1e6).toFixed(1)  + 'M';
+  if (n >= 1e3)  return '$' + (n/1e3).toFixed(0)  + 'K';
+  return '$' + n.toFixed(0);
+}
+
+function fmtPct(n) {
+  if (n === null || n === undefined) return '—';
+  const s = (n >= 0 ? '+' : '') + n.toFixed(2) + '%';
+  return s;
+}
+
+function spark(arr, isUp) {
+  if (!arr || arr.length < 2) return '<svg class="spark" viewBox="0 0 70 28"></svg>';
+  const slice = arr.slice(-30);
+  const min = Math.min(...slice), max = Math.max(...slice), range = max - min || 1;
+  const pts = slice.map((v, i) => {
+    const x = 2 + (i / (slice.length - 1)) * 66;
+    const y = 26 - ((v - min) / range) * 24;
+    return `${x.toFixed(1)},${y.toFixed(1)}`;
+  }).join(' ');
+  const c = isUp ? 'var(--green)' : 'var(--red)';
+  return `<svg class="spark" viewBox="0 0 70 28"><polyline points="${pts}" fill="none" stroke="${c}" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/></svg>`;
+}
+
+function coinIcon(t) {
+  const url = t.image || '';
+  if (url) return `<img src="${url}" alt="${t.symbol}" onerror="this.style.display='none'">`;
+  return t.symbol.slice(0,3);
+}
+
+/* ============================================================
+   FETCH DATA
+   ============================================================ */
+async function fetchData() {
+  const btn  = document.getElementById('refreshBtn');
+  const icon = document.getElementById('refreshIcon');
+  btn.disabled = true;
+  icon.textContent = '⟳';
+  icon.style.animation = 'spin 1s linear infinite';
+
+  document.getElementById('tableBody').innerHTML =
+    `<tr><td colspan="8"><div class="loader-wrap">
+      <div class="loader-text">Fetching market data</div>
+      <div class="loader-track"><div class="loader-fill"></div></div>
+    </div></td></tr>`;
+
+  try {
+    const ids = COINS.join(',');
+    const url = `https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${ids}&order=market_cap_desc&per_page=40&page=1&sparkline=true&price_change_percentage=24h`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const raw = await res.json();
+
+    allTokens = raw.map((c, i) => ({
+      rank:     i + 1,
+      id:       c.id,
+      symbol:   c.symbol.toUpperCase(),
+      name:     c.name,
+      price:    c.current_price,
+      change:   c.price_change_percentage_24h || 0,
+      volume:   c.total_volume || 0,
+      mcap:     c.market_cap   || 0,
+      high24:   c.high_24h     || 0,
+      low24:    c.low_24h      || 0,
+      ath:      c.ath          || 0,
+      athPct:   c.ath_change_percentage || 0,
+      sparkline: c.sparkline_in_7d?.price || [],
+      image:    c.image || '',
+      signal:   computeSignal(c.price_change_percentage_24h || 0, c.total_volume || 0, c.market_cap || 0)
+    }));
+
+    updateMetrics();
+    saveSnapshot();
+    currentPage = 1;
+    renderTable();
+    renderSignals();
+    renderMovers();
+    renderWatchlist();
+    showToast('Market data refreshed', 'green');
+  } catch (e) {
+    document.getElementById('tableBody').innerHTML =
+      `<tr><td colspan="9"><div class="error-wrap">⚠ Failed to fetch data.<br>${e.message}<br><br>CoinGecko free tier limits ~1 req/min. Wait and try again.</div></td></tr>`;
+    showToast('Fetch failed: ' + e.message, 'red');
+  }
+
+  btn.disabled = false;
+  icon.textContent = '↻';
+  icon.style.animation = '';
+}
+
+/* ============================================================
+   METRICS
+   ============================================================ */
+function updateMetrics() {
+  const avg = allTokens.reduce((a,t) => a + t.change, 0) / allTokens.length;
+  const buys  = allTokens.filter(t => t.signal.type === 'buy').length;
+  const sells = allTokens.filter(t => t.signal.type === 'sell').length;
+
+  document.getElementById('mTotal').textContent = allTokens.length;
+
+  const avgEl  = document.getElementById('mAvg');
+  avgEl.textContent  = fmtPct(avg);
+  avgEl.className    = 'metric-value ' + (avg >= 0 ? 'green' : 'red');
+  document.getElementById('mAvgSub').textContent = avg >= 0 ? 'Market leaning bullish' : 'Market leaning bearish';
+
+  document.getElementById('mBuy').textContent  = buys;
+  document.getElementById('mSell').textContent = sells;
+
+  const badge = document.getElementById('navBuyBadge');
+  badge.textContent = buys;
+
+  const wb = document.getElementById('watchBadge');
+  if (watchlist.size > 0) {
+    wb.style.display = 'inline';
+    wb.textContent   = watchlist.size;
+  } else {
+    wb.style.display = 'none';
+  }
+}
+
+/* ============================================================
+   TABLE
+   ============================================================ */
+function getFilteredTokens() {
+  let list = [...allTokens];
+  if (tableFilter === 'buy')  list = list.filter(t => t.signal.type === 'buy');
+  if (tableFilter === 'sell') list = list.filter(t => t.signal.type === 'sell');
+  if (searchQuery) {
+    const q = searchQuery.toLowerCase();
+    list = list.filter(t => t.symbol.toLowerCase().includes(q) || t.name.toLowerCase().includes(q));
+  }
+  return list;
+}
+
+function renderTable() {
+  const list = getFilteredTokens();
+  const total = list.length;
+  const pages = Math.ceil(total / perPage);
+  const start = (currentPage - 1) * perPage;
+  const slice = list.slice(start, start + perPage);
+  const maxVol = Math.max(...allTokens.map(t => t.volume), 1);
+
+  const sub = document.getElementById('tableSubtitle');
+  sub.textContent = `${total} token${total !== 1 ? 's' : ''} • Updated ${new Date().toLocaleTimeString()}`;
+
+  const tbody = document.getElementById('tableBody');
+  if (!slice.length) {
+    tbody.innerHTML = `<tr><td colspan="9"><div class="loader-wrap"><div class="loader-text" style="color:var(--text3)">No tokens match your filter</div></div></td></tr>`;
+    document.getElementById('pagination').style.display = 'none';
+    return;
+  }
+
+  tbody.innerHTML = slice.map((t, i) => {
+    const isUp  = t.change >= 0;
+    const wIcon = watchlist.has(t.id) ? '★' : '☆';
+    const wCls  = watchlist.has(t.id) ? 'watching' : '';
+    const volPct = Math.round((t.volume / maxVol) * 100);
+    const tgt = computeTarget(t);
+    const tgtCell = tgt
+      ? `<div style="line-height:1.6">
+           <div style="color:${tgt.isBuy?'var(--green)':'var(--red)'};font-size:11px;font-weight:700">${tgt.isBuy?'▲':'▼'} ${fmtPrice(tgt.target)}</div>
+           <div style="color:var(--text3);font-size:10px">SL ${fmtPrice(tgt.stop)} · R:R ${tgt.rr}</div>
+         </div>`
+      : `<span style="color:var(--text3);font-size:11px">—</span>`;
+    return `<tr onclick="openModal('${t.id}')" style="animation:fadeInUp .25s ease ${i*0.025}s both">
+      <td><span class="rank-num">${t.rank}</span></td>
+      <td>
+        <div class="coin-cell">
+          <div class="coin-icon">${coinIcon(t)}</div>
+          <div><div class="coin-sym">${t.symbol}</div><div class="coin-name">${t.name}</div></div>
+          <div style="margin-left:8px">${spark(t.sparkline, isUp)}</div>
+        </div>
+      </td>
+      <td class="r"><span class="price-cell">${fmtPrice(t.price)}</span></td>
+      <td class="r"><span class="chg-pill ${isUp?'pos':'neg'}">${isUp?'▲':'▼'} ${Math.abs(t.change).toFixed(2)}%</span></td>
+      <td class="r">
+        <div class="vol-bar-wrap">
+          <div class="vol-bar"><div class="vol-fill" style="width:${volPct}%"></div></div>
+          <span style="font-size:11px;color:var(--text2);min-width:55px;text-align:right">${fmtLarge(t.volume)}</span>
+        </div>
+      </td>
+      <td class="r" style="color:var(--text2)">${fmtLarge(t.mcap)}</td>
+      <td class="r"><span class="signal-tag ${t.signal.cls}">${t.signal.label}</span></td>
+      <td class="r">${tgtCell}</td>
+      <td class="r"><button class="watch-btn ${wCls}" onclick="event.stopPropagation();toggleWatch('${t.id}',this)">${wIcon}</button></td>
+    </tr>`;
+  }).join('');
+
+  // Pagination
+  const pag = document.getElementById('pagination');
+  if (pages <= 1) { pag.style.display = 'none'; return; }
+  pag.style.display = 'flex';
+  document.getElementById('pageInfo').textContent = `${start+1}–${Math.min(start+perPage, total)} of ${total}`;
+  const pb = document.getElementById('pageBtns');
+  let btns = `<button class="page-btn" onclick="goPage(${currentPage-1})" ${currentPage===1?'disabled':''}>‹</button>`;
+  for (let p = 1; p <= pages; p++) {
+    if (p === 1 || p === pages || Math.abs(p - currentPage) <= 1) {
+      btns += `<button class="page-btn ${p===currentPage?'active':''}" onclick="goPage(${p})">${p}</button>`;
+    } else if (Math.abs(p - currentPage) === 2) {
+      btns += `<span style="color:var(--text3);padding:0 4px;font-size:11px">…</span>`;
+    }
+  }
+  btns += `<button class="page-btn" onclick="goPage(${currentPage+1})" ${currentPage===pages?'disabled':''}>›</button>`;
+  pb.innerHTML = btns;
+}
+
+function goPage(p) {
+  const list = getFilteredTokens();
+  const pages = Math.ceil(list.length / perPage);
+  if (p < 1 || p > pages) return;
+  currentPage = p;
+  renderTable();
+  document.getElementById('page-markets').scrollTo(0, 0);
+}
+
+function setTableFilter(f, el) {
+  tableFilter = f;
+  currentPage = 1;
+  document.querySelectorAll('.filter-pills .pill').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  renderTable();
+}
+
+function handleSearch() {
+  searchQuery = document.getElementById('searchInput').value.trim();
+  currentPage = 1;
+  renderTable();
+}
+
+/* ============================================================
+   SIGNALS PAGE
+   ============================================================ */
+function renderSignals() {
+  let list = [...allTokens];
+  if (sigFilter === 'buy')  list = list.filter(t => t.signal.type === 'buy');
+  if (sigFilter === 'sell') list = list.filter(t => t.signal.type === 'sell');
+
+  list.sort((a, b) => Math.abs(b.signal.score) - Math.abs(a.signal.score));
+
+  const grid = document.getElementById('signalsGrid');
+  if (!list.length) {
+    grid.innerHTML = `<div style="grid-column:1/-1"><div class="watchlist-empty"><div class="icon">◎</div>No signals match filter</div></div>`;
+    return;
+  }
+
+  grid.innerHTML = list.map((t, i) => {
+    const isUp = t.change >= 0;
+    const cls = t.signal.type === 'buy' ? 'buy-card' : t.signal.type === 'sell' ? 'sell-card' : 'neut-card';
+    const scoreColor = t.signal.type === 'buy' ? 'var(--green)' : t.signal.type === 'sell' ? 'var(--red)' : 'var(--amber)';
+    return `<div class="signal-card ${cls} fade-in" style="animation-delay:${i*0.04}s" onclick="openModal('${t.id}')">
+      <div class="sc-header">
+        <div class="sc-coin">
+          <div class="coin-icon">${coinIcon(t)}</div>
+          <div><div class="sc-sym">${t.symbol}</div><div class="sc-name">${t.name}</div></div>
+        </div>
+        <div>
+          <div class="sc-price">${fmtPrice(t.price)}</div>
+          <div class="sc-chg" style="color:${isUp?'var(--green)':'var(--red)'}">${fmtPct(t.change)}</div>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <span class="signal-tag ${t.signal.cls}">${t.signal.label}</span>
+        <span style="font-size:11px;color:${scoreColor}">Score: ${t.signal.score > 0 ? '+' : ''}${t.signal.score}</span>
+      </div>
+      ${(() => {
+        const tgt = computeTarget(t);
+        if (!tgt) return '';
+        return `<div style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:10px 12px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <div style="font-size:9px;letter-spacing:.1em;color:var(--text3);text-transform:uppercase;margin-bottom:4px">Target</div>
+            <div style="font-size:13px;font-weight:700;font-family:var(--font-display);color:${tgt.isBuy?'var(--green)':'var(--red)'}">${fmtPrice(tgt.target)}</div>
+          </div>
+          <div style="text-align:center">
+            <div style="font-size:9px;letter-spacing:.1em;color:var(--text3);text-transform:uppercase;margin-bottom:4px">Stop Loss</div>
+            <div style="font-size:13px;font-weight:700;font-family:var(--font-display);color:var(--text2)">${fmtPrice(tgt.stop)}</div>
+          </div>
+          <div style="text-align:right">
+            <div style="font-size:9px;letter-spacing:.1em;color:var(--text3);text-transform:uppercase;margin-bottom:4px">R:R</div>
+            <div style="font-size:13px;font-weight:700;font-family:var(--font-display);color:var(--amber)">${tgt.rr}x</div>
+          </div>
+        </div>`;
+      })()}
+      <div class="sc-metrics">
+        <div><div class="sc-metric-label">Volume</div><div class="sc-metric-value">${fmtLarge(t.volume)}</div></div>
+        <div><div class="sc-metric-label">Mkt Cap</div><div class="sc-metric-value">${fmtLarge(t.mcap)}</div></div>
+        <div><div class="sc-metric-label">24h High</div><div class="sc-metric-value" style="color:var(--green)">${fmtPrice(t.high24)}</div></div>
+        <div><div class="sc-metric-label">24h Low</div><div class="sc-metric-value" style="color:var(--red)">${fmtPrice(t.low24)}</div></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function setSignalFilter(f, el) {
+  sigFilter = f;
+  document.querySelectorAll('#page-signals .filter-pills .pill').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  renderSignals();
+}
+
+/* ============================================================
+   WATCHLIST
+   ============================================================ */
+function toggleWatch(id, btn) {
+  if (watchlist.has(id)) {
+    watchlist.delete(id);
+    if (btn) { btn.textContent = '☆'; btn.classList.remove('watching'); }
+    showToast('Removed from watchlist', 'amber');
+  } else {
+    watchlist.add(id);
+    if (btn) { btn.textContent = '★'; btn.classList.add('watching'); }
+    showToast('Added to watchlist', 'green');
+  }
+  localStorage.setItem('signal_watch', JSON.stringify([...watchlist]));
+  const wb = document.getElementById('watchBadge');
+  if (watchlist.size > 0) { wb.style.display = 'inline'; wb.textContent = watchlist.size; }
+  else wb.style.display = 'none';
+  renderWatchlist();
+  if (modalToken?.id === id) {
+    document.getElementById('modalWatchBtn').textContent = watchlist.has(id) ? '★ Watching' : '☆ Watch';
+  }
+}
+
+function renderWatchlist() {
+  const watched = allTokens.filter(t => watchlist.has(t.id));
+  const tbody = document.getElementById('watchBody');
+  if (!watched.length) {
+    tbody.innerHTML = `<tr><td colspan="7"><div class="watchlist-empty"><div class="icon">◎</div>No tokens in watchlist.<br>Head to Markets and click ☆ to track a token.</div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = watched.map((t, i) => {
+    const isUp = t.change >= 0;
+    return `<tr onclick="openModal('${t.id}')" style="animation:fadeInUp .25s ease ${i*0.04}s both">
+      <td><span class="rank-num">${t.rank}</span></td>
+      <td><div class="coin-cell"><div class="coin-icon">${coinIcon(t)}</div><div><div class="coin-sym">${t.symbol}</div><div class="coin-name">${t.name}</div></div></div></td>
+      <td class="r"><span class="price-cell">${fmtPrice(t.price)}</span></td>
+      <td class="r"><span class="chg-pill ${isUp?'pos':'neg'}">${isUp?'▲':'▼'} ${Math.abs(t.change).toFixed(2)}%</span></td>
+      <td class="r" style="color:var(--text2)">${fmtLarge(t.volume)}</td>
+      <td class="r"><span class="signal-tag ${t.signal.cls}">${t.signal.label}</span></td>
+      <td class="r"><button class="watch-btn watching" onclick="event.stopPropagation();toggleWatch('${t.id}',this)">★</button></td>
+    </tr>`;
+  }).join('');
+}
+
+/* ============================================================
+   MODAL
+   ============================================================ */
+function openModal(id) {
+  const t = allTokens.find(x => x.id === id);
+  if (!t) return;
+  modalToken = t;
+
+  const isUp = t.change >= 0;
+  const vr = ((t.volume / (t.mcap || 1)) * 100).toFixed(1);
+  const athPct = t.athPct.toFixed(1);
+
+  document.getElementById('modalTitle').innerHTML = `
+    <div class="coin-icon" style="width:28px;height:28px;font-size:10px">${coinIcon(t)}</div>
+    ${t.name} <span style="color:var(--text3);font-size:13px;font-weight:400">${t.symbol}</span>`;
+
+  document.getElementById('modalBody').innerHTML = `
+    <div class="modal-price-row">
+      <div class="modal-price">${fmtPrice(t.price)}</div>
+      <div class="modal-chg" style="color:${isUp?'var(--green)':'var(--red)'}">${fmtPct(t.change)}</div>
+      <span class="signal-tag ${t.signal.cls}" style="margin-left:auto">${t.signal.label}</span>
+    </div>
+
+    <div class="modal-stats">
+      <div class="modal-stat"><div class="modal-stat-label">Market Cap</div><div class="modal-stat-value">${fmtLarge(t.mcap)}</div></div>
+      <div class="modal-stat"><div class="modal-stat-label">Volume 24h</div><div class="modal-stat-value">${fmtLarge(t.volume)}</div></div>
+      <div class="modal-stat"><div class="modal-stat-label">24h High</div><div class="modal-stat-value" style="color:var(--green)">${fmtPrice(t.high24)}</div></div>
+      <div class="modal-stat"><div class="modal-stat-label">24h Low</div><div class="modal-stat-value" style="color:var(--red)">${fmtPrice(t.low24)}</div></div>
+      <div class="modal-stat"><div class="modal-stat-label">Vol/MCap Ratio</div><div class="modal-stat-value">${vr}%</div></div>
+      <div class="modal-stat"><div class="modal-stat-label">From ATH</div><div class="modal-stat-value" style="color:var(--red)">${athPct}%</div></div>
+    </div>
+
+    ${(() => {
+      const tgt = computeTarget(t);
+      if (!tgt) return '';
+      const pctToTarget = (((tgt.target - t.price) / t.price) * 100).toFixed(1);
+      const pctToStop   = (((tgt.stop   - t.price) / t.price) * 100).toFixed(1);
+      return `<div style="background:var(--surface2);border:1px solid ${tgt.isBuy?'rgba(12,255,138,0.2)':'rgba(255,61,90,0.2)'};border-radius:6px;padding:14px 16px;margin-bottom:14px">
+        <div style="font-size:9px;letter-spacing:.15em;color:var(--text3);text-transform:uppercase;margin-bottom:12px">Price Targets</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
+          <div>
+            <div style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:5px">Target</div>
+            <div style="font-family:var(--font-display);font-size:16px;font-weight:800;color:${tgt.isBuy?'var(--green)':'var(--red)'}">${fmtPrice(tgt.target)}</div>
+            <div style="font-size:10px;color:var(--text3);margin-top:2px">${pctToTarget > 0 ? '+' : ''}${pctToTarget}%</div>
+          </div>
+          <div>
+            <div style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:5px">Stop Loss</div>
+            <div style="font-family:var(--font-display);font-size:16px;font-weight:800;color:var(--text2)">${fmtPrice(tgt.stop)}</div>
+            <div style="font-size:10px;color:var(--text3);margin-top:2px">${pctToStop > 0 ? '+' : ''}${pctToStop}%</div>
+          </div>
+          <div>
+            <div style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:5px">Risk : Reward</div>
+            <div style="font-family:var(--font-display);font-size:16px;font-weight:800;color:var(--amber)">${tgt.rr}x</div>
+            <div style="font-size:10px;color:var(--text3);margin-top:2px">${tgt.isBuy ? 'Long setup' : 'Short setup'}</div>
+          </div>
+        </div>
+      </div>`;
+    })()}
+
+    <div class="signal-analysis">
+      <div class="sa-title">Signal Breakdown</div>
+
+      <div class="sa-row">
+        <span class="sa-label">Momentum</span>
+        <div class="sa-bar-wrap">
+          <div class="sa-bar"><div class="sa-fill" style="width:${Math.min(100,Math.abs(t.change)*4)}%;background:${isUp?'var(--green)':'var(--red)'}"></div></div>
+        </div>
+        <span class="sa-val">${fmtPct(t.change)}</span>
+      </div>
+
+      <div class="sa-row">
+        <span class="sa-label">Volume Strength</span>
+        <div class="sa-bar-wrap">
+          <div class="sa-bar"><div class="sa-fill" style="width:${Math.min(100, parseFloat(vr)*5)}%;background:var(--blue)"></div></div>
+        </div>
+        <span class="sa-val">${vr}%</span>
+      </div>
+
+      <div class="sa-row">
+        <span class="sa-label">Signal Score</span>
+        <div class="sa-bar-wrap">
+          <div class="sa-bar"><div class="sa-fill" style="width:${Math.min(100,(Math.abs(t.signal.score)/8)*100)}%;background:${t.signal.type==='buy'?'var(--green)':t.signal.type==='sell'?'var(--red)':'var(--amber)'}"></div></div>
+        </div>
+        <span class="sa-val">${t.signal.score > 0 ? '+' : ''}${t.signal.score}</span>
+      </div>
+    </div>`;
+
+  document.getElementById('modalWatchBtn').textContent = watchlist.has(t.id) ? '★ Watching' : '☆ Watch';
+  document.getElementById('modalOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function toggleWatchFromModal() {
+  if (modalToken) toggleWatch(modalToken.id, null);
+}
+
+function closeModal(e) {
+  if (e.target === document.getElementById('modalOverlay')) closeModalDirect();
+}
+
+function closeModalDirect() {
+  document.getElementById('modalOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+/* ============================================================
+   HISTORY ENGINE
+   — Real snapshot system using localStorage.
+   — On each fetch, today's signals are saved with a date key.
+   — History page loads yesterday's snapshot and compares
+     entry/target/stop against today's live prices.
+   ============================================================ */
+let historyFilter = 'all';
+
+function todayKey() {
+  return 'signal_snap_' + new Date().toISOString().slice(0, 10);
+}
+
+function yesterdayKey() {
+  const d = new Date(); d.setDate(d.getDate() - 1);
+  return 'signal_snap_' + d.toISOString().slice(0, 10);
+}
+
+function saveSnapshot() {
+  const key  = todayKey();
+  // Don't overwrite an existing snapshot for today — first save of the day wins
+  // so it captures actual entry prices
+  if (localStorage.getItem(key)) return;
+
+  const snap = allTokens
+    .filter(t => t.signal.type !== 'neut')
+    .map(t => {
+      const tgt = computeTarget(t);
+      if (!tgt) return null;
+      return {
+        id:     t.id,
+        symbol: t.symbol,
+        name:   t.name,
+        image:  t.image,
+        entry:  t.price,           // actual price at time of first save today
+        target: tgt.target,
+        stop:   tgt.stop,
+        rr:     tgt.rr,
+        sig:    { label: t.signal.label, cls: t.signal.cls, type: t.signal.type }
+      };
+    }).filter(Boolean);
+
+  localStorage.setItem(key, JSON.stringify({ date: todayKey(), signals: snap }));
+
+  // Clean up snapshots older than 7 days
+  const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - 7);
+  Object.keys(localStorage)
+    .filter(k => k.startsWith('signal_snap_'))
+    .forEach(k => {
+      const d = new Date(k.replace('signal_snap_', ''));
+      if (d < cutoff) localStorage.removeItem(k);
+    });
+}
+
+function buildHistory() {
+  // Load yesterday's snapshot
+  const raw = localStorage.getItem(yesterdayKey());
+  if (!raw) return null; // no snapshot exists yet
+
+  const snap = JSON.parse(raw);
+
+  // Map snapshot signals against today's live prices
+  return snap.signals.map(s => {
+    const live = allTokens.find(t => t.id === s.id);
+    const current = live ? live.price : null;
+    if (!current) return null;
+
+    let outcome, pnl;
+    if (s.sig.type === 'buy') {
+      pnl = ((current - s.entry) / s.entry) * 100;
+      if (current >= s.target)   outcome = 'hit';
+      else if (current <= s.stop) outcome = 'stopped';
+      else                        outcome = 'open';
+    } else {
+      pnl = ((s.entry - current) / s.entry) * 100;
+      if (current <= s.target)   outcome = 'hit';
+      else if (current >= s.stop) outcome = 'stopped';
+      else                        outcome = 'open';
+    }
+
+    return { ...s, current, pnl, outcome, snapDate: snap.date };
+  }).filter(Boolean);
+}
+
+function setHistoryFilter(f, el) {
+  historyFilter = f;
+  document.querySelectorAll('#page-history .filter-pills .pill').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  renderHistory();
+}
+
+function renderHistory() {
+  if (!allTokens.length) return;
+
+  const tbody = document.getElementById('historyBody');
+  const all   = buildHistory();
+
+  // No snapshot from yesterday yet
+  if (all === null) {
+    document.getElementById('hTotal').textContent   = '—';
+    document.getElementById('hHits').textContent    = '—';
+    document.getElementById('hMiss').textContent    = '—';
+    document.getElementById('hPending').textContent = '—';
+    const yd = new Date(); yd.setDate(yd.getDate() - 1);
+    document.getElementById('historyDate').textContent =
+      yd.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' });
+    tbody.innerHTML = `<tr><td colspan="8">
+      <div class="watchlist-empty">
+        <div class="icon">◷</div>
+        No snapshot found for yesterday.<br>
+        SIGNAL saves today's signals automatically on first load.<br>
+        Come back tomorrow to see outcomes.
+      </div>
+    </td></tr>`;
+    return;
+  }
+
+  let list = [...all];
+  if (historyFilter === 'buy')  list = list.filter(h => h.sig.type === 'buy');
+  if (historyFilter === 'sell') list = list.filter(h => h.sig.type === 'sell');
+  if (historyFilter === 'hit')  list = list.filter(h => h.outcome === 'hit');
+
+  // Stats
+  document.getElementById('hTotal').textContent   = all.length;
+  document.getElementById('hHits').textContent    = all.filter(h => h.outcome === 'hit').length;
+  document.getElementById('hMiss').textContent    = all.filter(h => h.outcome === 'stopped').length;
+  document.getElementById('hPending').textContent = all.filter(h => h.outcome === 'open').length;
+
+  const yd = new Date(); yd.setDate(yd.getDate() - 1);
+  document.getElementById('historyDate').textContent =
+    yd.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' });
+
+  if (!list.length) {
+    tbody.innerHTML = `<tr><td colspan="8"><div class="loader-wrap"><div class="loader-text" style="color:var(--text3)">No entries match filter</div></div></td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = list.map((h, i) => {
+    const isBuy    = h.sig.type === 'buy';
+    const pnlColor = h.pnl >= 0 ? 'var(--green)' : 'var(--red)';
+    const pnlSign  = h.pnl >= 0 ? '+' : '';
+
+    // Build a minimal token-like object for coinIcon
+    const iconObj = { symbol: h.symbol, image: h.image || '' };
+
+    let outcomeHTML;
+    if (h.outcome === 'hit') {
+      outcomeHTML = `<span style="background:rgba(12,255,138,0.12);color:var(--green);border:1px solid rgba(12,255,138,0.3);padding:3px 9px;border-radius:4px;font-size:10px;font-weight:700;letter-spacing:.05em">✓ HIT</span>`;
+    } else if (h.outcome === 'stopped') {
+      outcomeHTML = `<span style="background:rgba(255,61,90,0.12);color:var(--red);border:1px solid rgba(255,61,90,0.3);padding:3px 9px;border-radius:4px;font-size:10px;font-weight:700;letter-spacing:.05em">✕ STOPPED</span>`;
+    } else {
+      outcomeHTML = `<span style="background:rgba(255,184,0,0.08);color:var(--amber);border:1px solid rgba(255,184,0,0.25);padding:3px 9px;border-radius:4px;font-size:10px;font-weight:700;letter-spacing:.05em">⏳ OPEN</span>`;
+    }
+
+    return `<tr style="animation:fadeInUp .25s ease ${i*0.03}s both">
+      <td>
+        <div class="coin-cell">
+          <div class="coin-icon">${coinIcon(iconObj)}</div>
+          <div><div class="coin-sym">${h.symbol}</div><div class="coin-name">${h.name}</div></div>
+        </div>
+      </td>
+      <td class="r"><span class="signal-tag ${h.sig.cls}">${h.sig.label}</span></td>
+      <td class="r" style="font-family:var(--font-display);font-weight:600">${fmtPrice(h.entry)}</td>
+      <td class="r" style="color:${isBuy?'var(--green)':'var(--red)'};font-weight:600">${fmtPrice(h.target)}</td>
+      <td class="r" style="color:var(--text2)">${fmtPrice(h.stop)}</td>
+      <td class="r" style="font-family:var(--font-display);font-weight:700">${fmtPrice(h.current)}</td>
+      <td class="r"><span style="font-weight:700;color:${pnlColor}">${pnlSign}${h.pnl.toFixed(2)}%</span></td>
+      <td class="r">${outcomeHTML}</td>
+    </tr>`;
+  }).join('');
+}
+
+/* ============================================================
+   MOVERS ENGINE
+   Scores each token 0–100 for probability of a significant
+   24h move. Uses 4 sub-scores:
+   1. Volume Spike    — current volume vs sparkline baseline
+   2. Momentum        — magnitude of 24h % change
+   3. Price Compression — tight 24h range signals coiling
+   4. ATH Distance    — for pumps: room to run; for dumps: extended
+   ============================================================ */
+let moverSortPump = 'score';
+let moverSortDump = 'score';
+
+function computeMoverScore(t) {
+  // 1. Volume spike: compare current volume vs avg volume implied by sparkline
+  //    We approximate avg by comparing sparkline variance — more flat = less vol
+  let volScore = 0;
+  const vr = t.volume / (t.mcap || 1);
+  if      (vr > 0.25) volScore = 40;
+  else if (vr > 0.15) volScore = 30;
+  else if (vr > 0.08) volScore = 20;
+  else if (vr > 0.03) volScore = 10;
+  else                volScore = 0;
+
+  // 2. Momentum score — absolute 24h change
+  const absChg = Math.abs(t.change);
+  let momScore = 0;
+  if      (absChg > 20) momScore = 35;
+  else if (absChg > 12) momScore = 28;
+  else if (absChg > 7)  momScore = 20;
+  else if (absChg > 3)  momScore = 12;
+  else if (absChg > 1)  momScore = 6;
+
+  // 3. Price compression: tight 24h range relative to price = coiling
+  const range = t.high24 - t.low24;
+  const rangePct = t.price > 0 ? (range / t.price) * 100 : 0;
+  let comprScore = 0;
+  // Paradox: very tight range on high volume = strong breakout setup
+  if      (rangePct < 3  && vr > 0.05) comprScore = 15;
+  else if (rangePct < 6  && vr > 0.03) comprScore = 10;
+  else if (rangePct < 10)              comprScore = 5;
+
+  // 4. ATH room (for pumps) or overextension (for dumps)
+  const athDist = Math.abs(t.athPct); // % below ATH
+  let athScore = 0;
+  if (t.change > 0) {
+    // Pump: room to ATH = upside potential
+    if      (athDist < 20)  athScore = 10; // near ATH, breaking out
+    else if (athDist < 50)  athScore = 7;
+    else if (athDist < 80)  athScore = 4;
+  } else {
+    // Dump: recently pumped = overextension risk
+    if      (athDist < 30)  athScore = 10;
+    else if (athDist < 60)  athScore = 6;
+    else                    athScore = 3;
+  }
+
+  const total = Math.min(100, volScore + momScore + comprScore + athScore);
+
+  // Direction
+  const direction = t.change >= 0 ? 'pump' : 'dump';
+
+  // Vol spike label
+  let spikeLabel;
+  if      (vr > 0.2)  spikeLabel = '🔥 Extreme';
+  else if (vr > 0.1)  spikeLabel = '⚡ High';
+  else if (vr > 0.05) spikeLabel = '↑ Elevated';
+  else                spikeLabel = '— Normal';
+
+  return { score: total, direction, volScore, momScore, comprScore, athScore, spikeLabel, rangePct: rangePct.toFixed(1) };
+}
+
+function setMoverSort(type, el, side) {
+  if (side === 'pump') moverSortPump = type;
+  else                 moverSortDump = type;
+  document.querySelectorAll(`#mover${side.charAt(0).toUpperCase()+side.slice(1)}Filter .pill`).forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  renderMovers();
+}
+
+function renderMovers() {
+  if (!allTokens.length) return;
+
+  // Score all tokens
+  const scored = allTokens.map(t => ({ ...t, mover: computeMoverScore(t) }));
+
+  // Separate pump / dump, threshold 40+ to appear
+  const pumps = scored.filter(t => t.mover.direction === 'pump' && t.mover.score >= 40);
+  const dumps = scored.filter(t => t.mover.direction === 'dump' && t.mover.score >= 40);
+
+  const sortFn = (type) => (a, b) => {
+    if (type === 'score')  return b.mover.score - a.mover.score;
+    if (type === 'change') return Math.abs(b.change) - Math.abs(a.change);
+    if (type === 'volume') return b.volume - a.volume;
+    return 0;
+  };
+
+  pumps.sort(sortFn(moverSortPump));
+  dumps.sort(sortFn(moverSortDump));
+
+  // Stats
+  const allMovers = [...pumps, ...dumps];
+  document.getElementById('mvTotal').textContent   = allMovers.length;
+  document.getElementById('mvPump').textContent    = pumps.length;
+  document.getElementById('mvDump').textContent    = dumps.length;
+  const avgScore = allMovers.length ? Math.round(allMovers.reduce((a,t) => a + t.mover.score, 0) / allMovers.length) : 0;
+  document.getElementById('mvAvgScore').textContent = avgScore;
+
+  // Update badge
+  const badge = document.getElementById('moversBadge');
+  if (allMovers.length) { badge.style.display = 'inline'; badge.textContent = allMovers.length; }
+  else badge.style.display = 'none';
+
+  const scoreBar = (score, color) =>
+    `<div style="display:flex;align-items:center;gap:6px">
+      <div style="flex:1;height:4px;background:var(--border2);border-radius:2px;overflow:hidden;min-width:40px">
+        <div style="height:100%;width:${score}%;background:${color};border-radius:2px;transition:width .4s"></div>
+      </div>
+      <span style="font-size:11px;font-weight:700;color:${color};min-width:28px;text-align:right">${score}</span>
+    </div>`;
+
+  const buildRows = (list, color, isBuy) =>
+    list.map((t, i) => {
+      const tgt = computeTarget(t);
+      return `<tr onclick="openModal('${t.id}')" style="animation:fadeInUp .22s ease ${i*0.03}s both">
+        <td>
+          <div class="coin-cell">
+            <div class="coin-icon">${coinIcon(t)}</div>
+            <div>
+              <div class="coin-sym">${t.symbol}</div>
+              <div class="coin-name">${t.name}</div>
+            </div>
+          </div>
+        </td>
+        <td class="r" style="font-family:var(--font-display);font-weight:700">${fmtPrice(t.price)}</td>
+        <td class="r"><span class="chg-pill ${isBuy?'pos':'neg'}">${isBuy?'▲':'▼'} ${Math.abs(t.change).toFixed(2)}%</span></td>
+        <td class="r" style="min-width:100px">${scoreBar(t.mover.score, color)}</td>
+        <td class="r" style="font-size:11px;color:var(--text2)">${t.mover.spikeLabel}</td>
+        <td class="r" style="color:${color};font-weight:700">${tgt ? fmtPrice(tgt.target) : '—'}</td>
+        <td class="r" style="color:var(--text2)">${tgt ? fmtPrice(tgt.stop) : '—'}</td>
+        <td class="r" style="color:var(--amber);font-weight:700">${tgt ? tgt.rr + 'x' : '—'}</td>
+      </tr>`;
+    }).join('');
+
+  const pumpBody = document.getElementById('pumpBody');
+  const dumpBody = document.getElementById('dumpBody');
+
+  pumpBody.innerHTML = pumps.length
+    ? buildRows(pumps, 'var(--green)', true)
+    : `<tr><td colspan="8"><div class="watchlist-empty" style="padding:30px"><div class="icon" style="font-size:20px">—</div>No pump candidates above threshold right now.</div></td></tr>`;
+
+  dumpBody.innerHTML = dumps.length
+    ? buildRows(dumps, 'var(--red)', false)
+    : `<tr><td colspan="8"><div class="watchlist-empty" style="padding:30px"><div class="icon" style="font-size:20px">—</div>No dump candidates above threshold right now.</div></td></tr>`;
+}
+
+/* ============================================================
+   NAVIGATION
+   ============================================================ */
+function navigate(page, el) {
+  activePage = page;
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+
+  const titles = { markets: ['Markets', 'Live overview'], signals: ['Signals', 'Algorithmic scoring'], watchlist: ['Watchlist', 'Your tracked tokens'], history: ['History', "Yesterday's signal outcomes"], movers: ['24h Movers', 'Pump & dump candidates'] };
+  document.getElementById('topbarTitle').textContent = titles[page][0];
+  document.getElementById('topbarSub').textContent   = ' ' + titles[page][1];
+
+  if (page === 'watchlist') renderWatchlist();
+  if (page === 'history')   renderHistory();
+  if (page === 'movers')    renderMovers();
+  closeSidebar();
+}
+
+function quickFilter(type, el) {
+  navigate('markets', document.querySelector('.nav-item'));
+  tableFilter = type === 'all' ? 'all' : 'all';
+
+  if (type === 'gainers') { allTokens.sort((a, b) => b.change - a.change); }
+  else if (type === 'losers') { allTokens.sort((a, b) => a.change - b.change); }
+  else if (type === 'volume') { allTokens.sort((a, b) => b.volume - a.volume); }
+  else { allTokens.sort((a, b) => a.rank - b.rank); }
+
+  // Set active nav
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.querySelector('.nav-item').classList.add('active');
+
+  currentPage = 1;
+  renderTable();
+
+  const labels = { gainers: 'Top Gainers', losers: 'Top Losers', volume: 'High Volume', all: 'All Tokens' };
+  showToast('Filter: ' + labels[type], 'green');
+  closeSidebar();
+}
+
+/* ============================================================
+   SIDEBAR MOBILE
+   ============================================================ */
+function toggleSidebar() {
+  const s = document.getElementById('sidebar');
+  const o = document.getElementById('mobileOverlay');
+  s.classList.toggle('open');
+  o.classList.toggle('open');
+}
+
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('mobileOverlay').classList.remove('open');
+}
+
+/* ============================================================
+   TOAST
+   ============================================================ */
+function showToast(msg, type = 'green') {
+  const wrap = document.getElementById('toastWrap');
+  const t = document.createElement('div');
+  t.className = `toast ${type}-toast`;
+  t.innerHTML = `<span>${type === 'green' ? '✓' : type === 'red' ? '⚠' : '★'}</span> ${msg}`;
+  wrap.appendChild(t);
+  setTimeout(() => t.remove(), 3200);
+}
+
+/* ============================================================
+   SPIN KEYFRAME
+   ============================================================ */
+const style = document.createElement('style');
+style.textContent = `@keyframes spin { from { transform:rotate(0deg) } to { transform:rotate(360deg) } }`;
+document.head.appendChild(style);
+
+/* ============================================================
+   INIT + AUTO-REFRESH
+   Fetches on load, then silently re-fetches every 5 minutes.
+   CoinGecko free tier allows ~1 req/min — 5min is safe.
+   ============================================================ */
+const REFRESH_INTERVAL = 5 * 60 * 1000; // 5 minutes
+let lastFetchTime = null;
+let countdownTimer = null;
+
+// Inject countdown display into topbar
+const countdownEl = document.createElement('div');
+countdownEl.id = 'countdown';
+countdownEl.style.cssText = 'font-size:10px;color:var(--text3);letter-spacing:.08em;white-space:nowrap;';
+document.querySelector('.topbar-right').prepend(countdownEl);
+
+function startCountdown() {
+  if (countdownTimer) clearInterval(countdownTimer);
+  lastFetchTime = Date.now();
+
+  countdownTimer = setInterval(() => {
+    const elapsed   = Date.now() - lastFetchTime;
+    const remaining = Math.max(0, REFRESH_INTERVAL - elapsed);
+    const mins = Math.floor(remaining / 60000);
+    const secs = Math.floor((remaining % 60000) / 1000);
+    countdownEl.textContent = `Auto-refresh in ${mins}:${String(secs).padStart(2,'0')}`;
+
+    if (remaining === 0) {
+      countdownEl.textContent = 'Refreshing...';
+      fetchData();
+    }
+  }, 1000);
+}
+
+// Wrap fetchData to restart countdown after each fetch
+const _origFetch = fetchData;
+window.fetchData = async function() {
+  await _origFetch();
+  startCountdown();
+};
+
+fetchData();
+</script>
+</body>
+</html>
